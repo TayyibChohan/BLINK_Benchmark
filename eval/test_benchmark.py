@@ -37,6 +37,8 @@ def analyze_answer(d, gpt_answer, all_choices):
         else:
             if len(intersect_last) == 1:
                 intersect = intersect_last
+                print(f'intersect_last: {intersect_last}')
+                print(f'gpt_answer: {gpt_answer}')  
                 gpt_answer = gpt_answer.split('\n\n')[-1]
             prediction = intersect[0]
         return prediction
