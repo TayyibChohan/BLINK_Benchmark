@@ -33,6 +33,7 @@ def analyze_answer(d, gpt_answer, all_choices):
             options = '\n'.join([f'{choices[i]} {d["choices"][i]}' for i in range(len(d['choices']))])
             extracted_answer = match_multiple_choice(f"{d['question']}\nSelect from the following choices", options, gpt_answer)
             prediction = extracted_answer
+            print(f'Extracted answer: {extracted_answer}')
         else:
             if len(intersect_last) == 1:
                 intersect = intersect_last
@@ -40,8 +41,8 @@ def analyze_answer(d, gpt_answer, all_choices):
             prediction = intersect[0]
         return prediction
     except Exception as e:
+        print(e)
         pass
-        # print(i, e)
 
 
 def query_model(task_name):
