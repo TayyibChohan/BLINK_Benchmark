@@ -2,7 +2,7 @@ from llava.model.builder import load_pretrained_model
 from llava.mm_utils import get_model_name_from_path, process_images, tokenizer_image_token
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, IGNORE_INDEX
 from llava.conversation import conv_templates, SeparatorStyle
-from openai import OpenAI
+# from openai import OpenAI
 import base64
 import os
 import time
@@ -10,7 +10,7 @@ from PIL import Image
 import requests
 import copy
 import torch
-client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+# client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
 pretrained = "lmms-lab/llama3-llava-next-8b"
 model_name = "llava_llama3"
@@ -65,74 +65,38 @@ def encode_image(image_path):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 
-def query_gpt4v(image_paths, prompt, retry=10):
-    """
-    Query the GPT-4 Vision model with the prompt and a list of image paths. The temperature is set to 0.0 and retry is set to 10 if fails as default setting.
+# def query_gpt4v(image_paths, prompt, retry=10):
+#     """
+#     Query the GPT-4 Vision model with the prompt and a list of image paths. The temperature is set to 0.0 and retry is set to 10 if fails as default setting.
 
-    Parameters:
-    - image_paths: List of Strings, the path to the images.
-    - prompt: String, the prompt.
-    - retry: Integer, the number of retries.
-    """
-    base64_images = [encode_image(image_path) for image_path in image_paths]
+#     Parameters:
+#     - image_paths: List of Strings, the path to the images.
+#     - prompt: String, the prompt.
+#     - retry: Integer, the number of retries.
+#     """
+#     base64_images = [encode_image(image_path) for image_path in image_paths]
 
-    for r in range(retry):
-        try:
-            input_dicts = [{"type": "text", "text": prompt}]
-            for i, image in enumerate(base64_images):
-                input_dicts.append({"type": "image_url",
-                                    "image_url": {"url": f"data:image/jpeg;base64,{image}", "detail": "low"}})
-            response = client.chat.completions.create(
-                model="gpt-4-vision-preview",
-                messages=[
-                    {
-                    "role": "user",
-                    "content": input_dicts,
-                    }
-                ],
-                max_tokens=1024,
-                n=1,
-                temperature=0.0,
-            )
-            print(response)
-            return response.choices[0].message.content
-        except Exception as e:
-            print(e)
-            time.sleep(1)
-    return 'Failed: Query GPT4V Error'
-
-def query_llava(image_paths, prompt, retry=10):
-    """
-    Query the LLAVA model with the prompt and a list of image paths. The temperature is set to 0.0 and retry is set to 10 if fails as default setting.
-
-    Parameters:
-    - image_paths: List of Strings, the path to the images.
-    - prompt: String, the prompt.
-    - retry: Integer, the number of retries.
-    """
-    base64_images = [encode_image(image_path) for image_path in image_paths]
-
-    for r in range(retry):
-        try:
-            input_dicts = [{"type": "text", "text": prompt}]
-            for i, image in enumerate(base64_images):
-                input_dicts.append({"type": "image_url",
-                                    "image_url": {"url": f"data:image/jpeg;base64,{image}", "detail": "low"}})
-            response = client.chat.completions.create(
-                model="llava",
-                messages=[
-                    {
-                    "role": "user",
-                    "content": input_dicts,
-                    }
-                ],
-                max_tokens=1024,
-                n=1,
-                temperature=0.0,
-            )
-            print(response)
-            return response.choices[0].message.content
-        except Exception as e:
-            print(e)
-            time.sleep(1)
-    return 'Failed: Query LLAVA Error'
+#     for r in range(retry):
+#         try:
+#             input_dicts = [{"type": "text", "text": prompt}]
+#             for i, image in enumerate(base64_images):
+#                 input_dicts.append({"type": "image_url",
+#                                     "image_url": {"url": f"data:image/jpeg;base64,{image}", "detail": "low"}})
+#             response = client.chat.completions.create(
+#                 model="gpt-4-vision-preview",
+#                 messages=[
+#                     {
+#                     "role": "user",
+#                     "content": input_dicts,
+#                     }
+#                 ],
+#                 max_tokens=1024,
+#                 n=1,
+#                 temperature=0.0,
+#             )
+#             print(response)
+#             return response.choices[0].message.content
+#         except Exception as e:
+#             print(e)
+#             time.sleep(1)
+#     return 'Failed: Query GPT4V Error'
