@@ -21,8 +21,8 @@ tokenizer, model, image_processor, max_length = load_pretrained_model(pretrained
 model.eval()
 model.tie_weights()
 
-def encode_image_from_url(url):
-    image = Image.open(requests.get(url, stream=True).raw)
+def encode_image_from_url(file_path)
+    image = Image.open(file_path)
     return image
 
 def query_llava(image_urls, question, conv_template="llava_llama_3"):
@@ -34,7 +34,7 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
     - question: String, the question prompt.
     - conv_template: String, the conversation template to use.
     """
-    images = [encode_image_from_url(url) for url in image_urls]
+    images = [encode_image(image_url) for image_url in image_urls]
     image_tensor = process_images(images, image_processor, model.config)
     image_tensor = [_image.to(dtype=torch.float16, device=device) for _image in image_tensor]
     image_sizes = [image.size for image in images]
