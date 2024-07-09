@@ -56,7 +56,8 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
     )
     text_outputs = tokenizer.batch_decode(cont, skip_special_tokens=True)
     print(text_outputs)
-    return text_outputs
+
+    return "".join(text_outputs)
 
 
 
