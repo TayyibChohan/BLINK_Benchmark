@@ -64,7 +64,8 @@ def encode_image(image_path):
   with open(image_path, "rb") as image_file:
     return base64.b64encode(image_file.read()).decode('utf-8')
 
-
+def query_gpt4v(image_paths, promt, retry=10):
+   return "Not implemented yet"
 # def query_gpt4v(image_paths, prompt, retry=10):
 #     """
 #     Query the GPT-4 Vision model with the prompt and a list of image paths. The temperature is set to 0.0 and retry is set to 10 if fails as default setting.
