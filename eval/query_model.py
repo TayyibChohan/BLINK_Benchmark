@@ -21,7 +21,7 @@ tokenizer, model, image_processor, max_length = load_pretrained_model(pretrained
 model.eval()
 model.tie_weights()
 
-def encode_image_from_url(file_path)
+def encode_image_from_url(file_path):
     image = Image.open(file_path)
     return image
 
