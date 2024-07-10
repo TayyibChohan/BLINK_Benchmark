@@ -23,11 +23,6 @@ def analyze_answer(d, gpt_answer, all_choices):
     """
     try:
         intersect = list(set(all_choices).intersection(set(gpt_answer.split())))
-        if isinstance(gpt_answer, list):
-            if len(gpt_answer) == 1:
-                gpt_answer = gpt_answer[0]
-            else:
-                gpt_answer = "".join
         intersect_last = list(set(all_choices).intersection(set(gpt_answer.split('\n\n')[-1].split())))
         if gpt_answer in ["A", "B", "C", "D", "E"]:
             prediction = "(" + gpt_answer + ")"
