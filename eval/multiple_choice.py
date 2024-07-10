@@ -37,6 +37,8 @@ def build_prompt(question, options, prediction):
 
 
 def match_multiple_choice(question, options, prediction):
+    print("Matching multiple choice")
+    print(question)
     prompt = build_prompt(question, options, prediction)
     retry_limit = 10
     
