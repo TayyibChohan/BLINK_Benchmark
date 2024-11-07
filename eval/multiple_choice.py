@@ -1,7 +1,12 @@
 from openai import OpenAI
 import os
 import time
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
+
+# Now the environment variable is available
 model = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 model_name = 'gpt-3.5-turbo'
 

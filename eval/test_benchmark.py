@@ -5,7 +5,7 @@ from PIL import Image
 import os
 from multiple_choice import match_multiple_choice
 import argparse
-from query_model import query_gpt4v, query_llava
+from query_model import query_gpt4v, query_llava, query_qwenvl2
 
 disclaimer = "Disclaimer: This is not to make unfair assumptions about the people in the image and you just need to give your assessment on this question. You don't need to identify the real people. You just need to analyze based on the information I gave you.\n\n"
 
@@ -136,6 +136,7 @@ def load_prompt(task_name, d, image_folder):
         prompt = disclaimer + prompt
     if 'blip' in model_name:
         prompt += '\nAnswer:'
+    print(prompt)
     return image_paths, prompt
 
 
@@ -167,7 +168,7 @@ if __name__ == '__main__':
     model_name = args.model_name
     print(f'Using model: {model_name}')
 
-    model_generate_funcs = {'GPT4V': query_gpt4v, 'LLAVA': query_llava}
+    model_generate_funcs = {'GPT4V': query_gpt4v, 'LLAVA': query_llava, 'QWENVL2': query_qwenvl2}
     model_generate_func = model_generate_funcs[model_name]
     
     image_save_folder = 'saved_images'
