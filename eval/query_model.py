@@ -82,7 +82,7 @@ max_pixels = 1280*28*28
 processor = AutoProcessor.from_pretrained(
     "Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels)
 
-def generate_qwen_vl2_message(image_paths, prompt):
+def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         """
         Generate the message for the QwenVL2 model. in the following format:
          messages = [
@@ -103,7 +103,11 @@ def generate_qwen_vl2_message(image_paths, prompt):
         content = []
         for image_path in image_paths:
             content.append({"type": "image", "image": f"data:image;base64,{image_path}"})
-        content.append({"type": "text", "text": prompt})
+        if not format_as_json:
+            content.append({"type": "text", "text": prompt})
+        else:
+            text = prompt + "\n" + "Format your answer as a JSON object with the following keys: 'answer', 'explanation'."
+            content.append({"type": "text", "text": text})
         messages.append({"role": "user", "content": content})
         return messages
 
@@ -116,7 +120,7 @@ def query_qwenvl2(image_paths, prompt, retry=10):
     - prompt: String, the prompt.
     - retry: Integer, the number of retries.
     """
-    print(prompt)
+    # print(prompt)
     for r in range(retry):
         try:
             base64_images = [encode_image(image_path) for image_path in image_paths]

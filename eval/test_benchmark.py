@@ -73,13 +73,33 @@ def query_model(task_name):
                 all_choices = ['(A)', '(B)', '(C)', '(D)', '(E)'][:len(orig_d['choices'])]
                 image_paths, prompt = load_prompt(task_name, orig_d, image_folder)
                 gpt_answer = model_generate_func(image_paths, prompt)
-                prediction = analyze_answer(orig_d, gpt_answer, all_choices)
+                if 'qwen' in model_name:
+                    prediction = analyze_qwen_answer(orig_d, gpt_answer, all_choices)
+                else:
+                    prediction = analyze_answer(orig_d, gpt_answer, all_choices)
                 outputs[split].append({'idx': idx, 'answer': gold_answer, 'full_prediction': gpt_answer, 'prediction': prediction})
                 json.dump(outputs, open(output_path, 'w'), indent=4)
             json.dump(outputs, open(output_path, 'w'), indent=4)
     else:
         outputs = json.load(open(output_path, 'r'))
     return outputs
+
+def analyze_qwen_answer(d, gpt_answer, all_choices):
+    '''
+    Extracts data from the model output and returns the prediction.
+    We expect the model to output a JSON string with an "answer" key.
+    '''
+    print(gpt_answer)
+    try:
+        answer = json.loads(gpt_answer)['answer']
+        if answer in ['A', 'B', 'C', 'D', 'E']:
+            answer = '(' + answer + ')'
+        if answer not in all_choices:
+            answer = '(Z)'
+        return answer
+    except Exception as e:
+        print(e)
+        pass
 
 
 def concat_images_horizontally_with_margin(image_filenames, output_filename, margin=10):
