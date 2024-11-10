@@ -101,7 +101,6 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
         print(e)
         pass
 
-
 def concat_images_horizontally_with_margin(image_filenames, output_filename, margin=10):
     """
     Concatenates images horizontally with a specified margin between images,
@@ -176,8 +175,8 @@ def eval_task(task_name):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", type=str, default='GPT4V', help="select the model name")
-    parser.add_argument("--task_name", type=str, default='Relative_Depth', help="select the task name")
+    parser.add_argument("--model_name", type=str, default='QWENVL2', help="select the model name")
+    parser.add_argument("--task_name", type=str, default='all', help="select the task name")
     args = parser.parse_args()
     return args
 
@@ -186,6 +185,8 @@ if __name__ == '__main__':
 
     args = parse_args()
     model_name = args.model_name
+    if args.model_name not in ['GPT4V', 'LLAVA', 'QWENVL2']:
+        model_name = 'QWENVL2'
     print(f'Using model: {model_name}')
 
     model_generate_funcs = {'GPT4V': query_gpt4v, 'LLAVA': query_llava, 'QWENVL2': query_qwenvl2}
