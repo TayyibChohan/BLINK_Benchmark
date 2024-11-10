@@ -9,6 +9,7 @@ from query_model import query_gpt4v, query_llava, query_qwenvl2
 
 disclaimer = "Disclaimer: This is not to make unfair assumptions about the people in the image and you just need to give your assessment on this question. You don't need to identify the real people. You just need to analyze based on the information I gave you.\n\n"
 
+
 def analyze_answer(d, gpt_answer, all_choices):
     """
     extracts the multiple choice answer from a long paragraph of model output if there is only one choice; otherwise, query GPT3.5 turbo to extract the choice. If the model output is short and only contains the choice, reformats the choice in the correct format e.g. (A) and returns the choice as is.
@@ -22,23 +23,27 @@ def analyze_answer(d, gpt_answer, all_choices):
     - prediction, the extracted answer.
     """
     try:
-        intersect = list(set(all_choices).intersection(set(gpt_answer.split())))
-        intersect_last = list(set(all_choices).intersection(set(gpt_answer.split('\n\n')[-1].split())))
+        intersect = list(set(all_choices).intersection(
+            set(gpt_answer.split())))
+        intersect_last = list(set(all_choices).intersection(
+            set(gpt_answer.split('\n\n')[-1].split())))
         if gpt_answer in ["A", "B", "C", "D", "E"]:
             prediction = "(" + gpt_answer + ")"
         elif gpt_answer in ['(A)', '(B)', '(C)', '(D)', '(E)']:
             prediction = gpt_answer
         elif (len(intersect) != 1 and len(intersect_last) != 1) or len(intersect) < 1:
             choices = ['(A)', '(B)', '(C)', '(D)', '(E)']
-            options = '\n'.join([f'{choices[i]} {d["choices"][i]}' for i in range(len(d['choices']))])
-            extracted_answer = match_multiple_choice(f"{d['question']}\nSelect from the following choices", options, gpt_answer)
+            options = '\n'.join(
+                [f'{choices[i]} {d["choices"][i]}' for i in range(len(d['choices']))])
+            extracted_answer = match_multiple_choice(
+                f"{d['question']}\nSelect from the following choices", options, gpt_answer)
             prediction = extracted_answer
             print(f'Extracted answer: {extracted_answer}')
         else:
             if len(intersect_last) == 1:
                 intersect = intersect_last
                 print(f'intersect_last: {intersect_last}')
-                print(f'gpt_answer: {gpt_answer}')  
+                print(f'gpt_answer: {gpt_answer}')
                 gpt_answer = gpt_answer.split('\n\n')[-1]
             prediction = intersect[0]
         return prediction
@@ -58,7 +63,7 @@ def query_model(task_name):
     - outputs, The result is also saved to 'output_filename.json'.
     """
     dataset_name = 'BLINK-Benchmark/BLINK'
-    
+
     output_path = f'{output_save_folder}/{model_name}/{task_name.replace("_", " ")}.json'
     os.makedirs(f'{output_save_folder}/{model_name}', exist_ok=True)
     image_folder = f'{image_save_folder}/{task_name}_images'
@@ -70,36 +75,44 @@ def query_model(task_name):
             for orig_d in tqdm(test_data):
                 idx = orig_d['idx']
                 gold_answer = orig_d['answer']
-                all_choices = ['(A)', '(B)', '(C)', '(D)', '(E)'][:len(orig_d['choices'])]
-                image_paths, prompt = load_prompt(task_name, orig_d, image_folder)
+                all_choices = ['(A)', '(B)', '(C)', '(D)',
+                               '(E)'][:len(orig_d['choices'])]
+                image_paths, prompt = load_prompt(
+                    task_name, orig_d, image_folder)
                 gpt_answer = model_generate_func(image_paths, prompt)
                 if 'qwen' in model_name:
-                    prediction = analyze_qwen_answer(orig_d, gpt_answer, all_choices)
+                    prediction = analyze_qwen_answer(
+                        orig_d, gpt_answer, all_choices)
                 else:
-                    prediction = analyze_answer(orig_d, gpt_answer, all_choices)
-                outputs[split].append({'idx': idx, 'answer': gold_answer, 'full_prediction': gpt_answer, 'prediction': prediction})
+                    prediction = analyze_answer(
+                        orig_d, gpt_answer, all_choices)
+                outputs[split].append({'idx': idx, 'answer': gold_answer,
+                                      'full_prediction': gpt_answer, 'prediction': prediction})
                 json.dump(outputs, open(output_path, 'w'), indent=4)
             json.dump(outputs, open(output_path, 'w'), indent=4)
     else:
         outputs = json.load(open(output_path, 'r'))
     return outputs
 
+
 def analyze_qwen_answer(d, gpt_answer, all_choices):
     '''
     Extracts data from the model output and returns the prediction.
     We expect the model to output a JSON string with an "answer" key.
-    '''
-    print(gpt_answer)
+
+    We expect the gpt_answer to be in the format:
+    ['user\n```json\n{\n  "answer": "A",\n  "explanation": "The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is A."\n}\n```']
+ '''
     try:
-        answer = json.loads(gpt_answer)['answer']
-        if answer in ['A', 'B', 'C', 'D', 'E']:
-            answer = '(' + answer + ')'
-        if answer not in all_choices:
-            answer = '(Z)'
-        return answer
+        gpt_answer = gpt_answer.split('\n```json\n')[1].split('\n```')[0]
+        gpt_answer = json.loads(gpt_answer)
+        prediction = gpt_answer['answer']
+        print(f'Extracted answer: {prediction}')
+        return prediction
     except Exception as e:
         print(e)
         pass
+
 
 def concat_images_horizontally_with_margin(image_filenames, output_filename, margin=10):
     """
@@ -116,10 +129,11 @@ def concat_images_horizontally_with_margin(image_filenames, output_filename, mar
     """
     images = [Image.open(filename) for filename in image_filenames]
     max_height = max(image.height for image in images)
-    total_width = sum(image.width for image in images) + margin * (len(images) - 1)
+    total_width = sum(image.width for image in images) + \
+        margin * (len(images) - 1)
     # Create a new image with a black background
     new_image = Image.new('RGB', (total_width, max_height), (0, 0, 0))
-    
+
     x_offset = 0
     for image in images:
         # Calculate padding to center the image vertically
@@ -166,17 +180,20 @@ def eval_task(task_name):
         for d in outputs[split]:
             if d['answer'] == d['prediction']:
                 accu[split] += 1
-    
+
     print('-'*50)
     print(f'Task {task_name} Performance')
     for split in ['val']:
-        print(f'{split} accuracy: {round(accu[split]/len(outputs[split])*100, 2)}%')
+        print(
+            f'{split} accuracy: {round(accu[split]/len(outputs[split])*100, 2)}%')
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", type=str, default='QWENVL2', help="select the model name")
-    parser.add_argument("--task_name", type=str, default='all', help="select the task name")
+    parser.add_argument("--model_name", type=str,
+                        default='QWENVL2', help="select the model name")
+    parser.add_argument("--task_name", type=str,
+                        default='all', help="select the task name")
     args = parser.parse_args()
     return args
 
@@ -189,17 +206,18 @@ if __name__ == '__main__':
         model_name = 'QWENVL2'
     print(f'Using model: {model_name}')
 
-    model_generate_funcs = {'GPT4V': query_gpt4v, 'LLAVA': query_llava, 'QWENVL2': query_qwenvl2}
+    model_generate_funcs = {'GPT4V': query_gpt4v,
+                            'LLAVA': query_llava, 'QWENVL2': query_qwenvl2}
     model_generate_func = model_generate_funcs[model_name]
-    
+
     image_save_folder = 'saved_images'
     output_save_folder = 'outputs'
     dataset_name = 'BLINK-Benchmark/BLINK'
-    
 
     need_disclaimer_tasks = ['Forensic_Detection', 'Jigsaw', 'Art_Style']
-    if args.task_name == 'all': 
-        subtasks = ['Art_Style', 'Functional_Correspondence', 'Multi-view_Reasoning', 'Relative_Reflectance', 'Visual_Correspondence', 'Counting', 'IQ_Test', 'Object_Localization', 'Semantic_Correspondence', 'Visual_Similarity', 'Forensic_Detection', 'Jigsaw', 'Relative_Depth', 'Spatial_Relation']
+    if args.task_name == 'all':
+        subtasks = ['Art_Style', 'Functional_Correspondence', 'Multi-view_Reasoning', 'Relative_Reflectance', 'Visual_Correspondence', 'Counting', 'IQ_Test',
+                    'Object_Localization', 'Semantic_Correspondence', 'Visual_Similarity', 'Forensic_Detection', 'Jigsaw', 'Relative_Depth', 'Spatial_Relation']
     else:
         subtasks = [args.task_name]
 
