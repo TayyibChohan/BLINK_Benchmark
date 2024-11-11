@@ -104,6 +104,8 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
     ['user\n```json\n{\n  "answer": "A",\n  "explanation": "The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is A."\n}\n```']
  '''
     try:
+        if type(gpt_answer) == list:
+            gpt_answer = gpt_answer[0]
         gpt_answer = gpt_answer.split('\n```json\n')[1].split('\n```')[0]
         gpt_answer = json.loads(gpt_answer)
         prediction = gpt_answer['answer']
