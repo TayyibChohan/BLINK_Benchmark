@@ -107,10 +107,16 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
         gpt_answer = gpt_answer.split('\n```json\n')[1].split('\n```')[0]
         gpt_answer = json.loads(gpt_answer)
         prediction = gpt_answer['answer']
+        #convert the answer to the format (A)
+        if prediction in ['A', 'B', 'C', 'D', 'E']:
+            prediction = f'({prediction})'
+        else:
+            prediction = prediction.replace(' ', '')
+            prediction = f'({prediction})'
         print(f'Extracted answer: {prediction}')
         return prediction
     except Exception as e:
-        print(e)
+        print(f'Error: {e}')
         pass
 
 
