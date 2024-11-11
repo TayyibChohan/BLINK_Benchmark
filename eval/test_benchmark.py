@@ -80,7 +80,7 @@ def query_model(task_name):
                 image_paths, prompt = load_prompt(
                     task_name, orig_d, image_folder)
                 gpt_answer = model_generate_func(image_paths, prompt)
-                if 'qwen' in model_name:
+                if 'qwen' in model_name or 'QWEN' in model_name:
                     prediction = analyze_qwen_answer(
                         orig_d, gpt_answer, all_choices)
                 else:
