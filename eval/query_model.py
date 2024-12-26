@@ -107,7 +107,7 @@ def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
             content.append({"type": "text", "text": prompt})
         else:
             # formating_instruction = "Format your answer as a JSON object with the following keys: 'answer', 'explanation' and valid answers are 'A', 'B', 'C', 'D', 'E'."
-            formating_instruction = "Format your answr using an XML like structure. With the tag <answer> and valid answers are 'A', 'B', 'C', 'D', 'E'. For example: <answer>A</answer> because..."
+            formating_instruction = "Surround your final answer with the tag <answer></answer> and valid final answers are 'A', 'B', 'C', 'D', 'E'"
             text = prompt + "\n" + formating_instruction
             content.append({"type": "text", "text": text})
         messages.append({"role": "user", "content": content})
