@@ -96,50 +96,50 @@ def query_model(task_name):
 
 
 def analyze_qwen_answer(d, gpt_answer, all_choices):
-#     '''
-#     Extracts data from the model output and returns the prediction.
-#     We expect the model to output a JSON string with an "answer" key.
-
-#     We expect the gpt_answer to be in the format:
-#     ['user\n```json\n{\n  "answer": "A",\n  "explanation": "The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is A."\n}\n```']
-#  '''
-    # try:
-    #     if type(gpt_answer) == list:
-    #         gpt_answer = gpt_answer[0]
-    #     gpt_answer = gpt_answer.split('\n```json\n')[1].split('\n```')[0]
-    #     gpt_answer = json.loads(gpt_answer)
-    #     prediction = gpt_answer['answer']
-    #     #convert the answer to the format (A)
-    #     if prediction in ['A', 'B', 'C', 'D', 'E']:
-    #         prediction = f'({prediction})'
-    #     else:
-    #         prediction = prediction.replace(' ', '')
-    #         prediction = f'({prediction})'
-    #     print(f'Extracted answer: {prediction}')
-    #     return prediction
-    # except Exception as e:
-    #     print(f'Error: {e}')
-    #     pass
-
-    """
+    '''
     Extracts data from the model output and returns the prediction.
-    We expect the model to output a string with the answer in XML format. With the tag <answer> and valid answers are 'A', 'B', 'C', 'D', 'E'.
-    """
+    We expect the model to output a JSON string with an "answer" key.
+
+    We expect the gpt_answer to be in the format:
+    ['user\n```json\n{\n  "answer": "A",\n  "explanation": "The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is A."\n}\n```']
+ '''
     try:
         if type(gpt_answer) == list:
             gpt_answer = gpt_answer[0]
-        gpt_answer = gpt_answer.split('<answer>')[1].split('</answer>')[0]
-        if gpt_answer in ['A', 'B', 'C', 'D', 'E']:
-            prediction = f'({gpt_answer})'
-        elif gpt_answer in ['(A)', '(B)', '(C)', '(D)', '(E)']:
-            prediction = gpt_answer
+        gpt_answer = gpt_answer.split('\n```json\n')[1].split('\n```')[0]
+        gpt_answer = json.loads(gpt_answer)
+        prediction = gpt_answer['answer']
+        #convert the answer to the format (A)
+        if prediction in ['A', 'B', 'C', 'D', 'E']:
+            prediction = f'({prediction})'
         else:
-            prediction = f'(Z)'
+            prediction = prediction.replace(' ', '')
+            prediction = f'({prediction})'
         print(f'Extracted answer: {prediction}')
         return prediction
-    
     except Exception as e:
         print(f'Error: {e}')
+        pass
+
+    # """
+    # Extracts data from the model output and returns the prediction.
+    # We expect the model to output a string with the answer in XML format. With the tag <answer> and valid answers are 'A', 'B', 'C', 'D', 'E'.
+    # """
+    # try:
+    #     if type(gpt_answer) == list:
+    #         gpt_answer = gpt_answer[0]
+    #     gpt_answer = gpt_answer.split('<answer>')[1].split('</answer>')[0]
+    #     if gpt_answer in ['A', 'B', 'C', 'D', 'E']:
+    #         prediction = f'({gpt_answer})'
+    #     elif gpt_answer in ['(A)', '(B)', '(C)', '(D)', '(E)']:
+    #         prediction = gpt_answer
+    #     else:
+    #         prediction = f'(Z)'
+    #     print(f'Extracted answer: {prediction}')
+    #     return prediction
+    
+    # except Exception as e:
+    #     print(f'Error: {e}')
 
 
 def concat_images_horizontally_with_margin(image_filenames, output_filename, margin=10):
