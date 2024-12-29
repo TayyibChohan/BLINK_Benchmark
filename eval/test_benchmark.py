@@ -119,6 +119,7 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
         return prediction
     except Exception as e:
         print(f'Error: {e}')
+        return '(Z)'
         pass
 
     # """
