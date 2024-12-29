@@ -129,8 +129,11 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
         if type(gpt_answer) == list:
             gpt_answer = gpt_answer[0]
         gpt_answer = gpt_answer.split('<answer>')[1].split('</answer>')[0]
-        prediction = f'({gpt_answer})'
-        if prediction not in ['(A)', '(B)', '(C)', '(D)', '(E)']:
+        if gpt_answer in ['A', 'B', 'C', 'D', 'E']:
+            prediction = f'({gpt_answer})'
+        elif gpt_answer in ['(A)', '(B)', '(C)', '(D)', '(E)']:
+            prediction = gpt_answer
+        else:
             prediction = f'(Z)'
         print(f'Extracted answer: {prediction}')
         return prediction
