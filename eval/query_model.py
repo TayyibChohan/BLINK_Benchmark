@@ -70,6 +70,7 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
 
 
 model = Qwen2VLForConditionalGeneration.from_pretrained(
+    # "Qwen/QVQ-72B-Preview",
     "Qwen/Qwen2-VL-2B-Instruct",
     torch_dtype="auto",
     # torch_dtype=torch.bfloat16,
@@ -106,7 +107,8 @@ def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         if not format_as_json:
             content.append({"type": "text", "text": prompt})
         else:
-            formating_instruction = "Format your answer as a JSON object with the following keys: 'answer', 'explanation' and valid answers are only 'A', 'B', 'C', 'D', or 'E'."
+            # formating_instruction = "Format your answer as a JSON object with the following keys: 'answer', 'explanation' and valid answers are only 'A', 'B', 'C', 'D', or 'E'."
+            formating_instruction = "Use \\block{ } to format your anwer. Where valid answers are only 'A', 'B', 'C', 'D', or 'E'.  For example: \\block{(A)} is the answer because it is more similar to the provided image"
             # formating_instruction = "Surround your answer with the tags <answer> and </answer> with valid answers being 'A', 'B', 'C', 'D', 'E'. You can also provide an explanation by surrounding it with the tags <explanation> and </explanation>."
             text = prompt + "\n" + formating_instruction
             content.append({"type": "text", "text": text})

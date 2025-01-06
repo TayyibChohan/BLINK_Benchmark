@@ -101,14 +101,14 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
     We expect the model to output a JSON string with an "answer" key.
 
     We expect the gpt_answer to be in the format:
-    ['user\n```json\n{\n  "answer": "A",\n  "explanation": "The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is A."\n}\n```']
- '''
+    [''user \n The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is \\block{A}"\n']
+    '''
+ 
     try:
         if type(gpt_answer) == list:
             gpt_answer = gpt_answer[0]
-        gpt_answer = gpt_answer.split('\n```json\n')[1].split('\n```')[0]
-        gpt_answer = json.loads(gpt_answer)
-        prediction = gpt_answer['answer']
+        gpt_answer = gpt_answer.split('block{')[1].split('}')[0]
+        prediction = gpt_answer
         #convert the answer to the format (A)
         if prediction in ['A', 'B', 'C', 'D', 'E']:
             prediction = f'({prediction})'
@@ -118,9 +118,34 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
         print(f'Extracted answer: {prediction}')
         return prediction
     except Exception as e:
-        print(f'Error: {e}')
-        return '(Z)'
-        pass
+        print('\033[93m' + f'Error: {e}' + '\033[0m')
+        return '(Z)'        
+
+#     '''
+#     Extracts data from the model output and returns the prediction.
+#     We expect the model to output a JSON string with an "answer" key.
+
+#     We expect the gpt_answer to be in the format:
+#     ['user\n```json\n{\n  "answer": "A",\n  "explanation": "The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is A."\n}\n```']
+#  '''
+#     try:
+#         if type(gpt_answer) == list:
+#             gpt_answer = gpt_answer[0]
+#         gpt_answer = gpt_answer.split('\n```json\n')[1].split('\n```')[0]
+#         gpt_answer = json.loads(gpt_answer)
+#         prediction = gpt_answer['answer']
+#         #convert the answer to the format (A)
+#         if prediction in ['A', 'B', 'C', 'D', 'E']:
+#             prediction = f'({prediction})'
+#         else:
+#             prediction = prediction.replace(' ', '')
+#             prediction = f'({prediction})'
+#         print(f'Extracted answer: {prediction}')
+#         return prediction
+#     except Exception as e:
+#         print('\033[93m' + f'Error: {e}' + '\033[0m')
+#         return '(Z)'
+#         pass
 
     # """
     # Extracts data from the model output and returns the prediction.
