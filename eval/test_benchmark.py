@@ -108,7 +108,7 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
         if type(gpt_answer) == list:
             gpt_answer = gpt_answer[0]
         #remove the user and \n
-        gpt_answer = gpt_answer.split('user')[1].split('\n')[1]
+        gpt_answer = gpt_answer.split('user')[1].split('\n')[1] if 'user' in gpt_answer else gpt_answer
         gpt_answer = gpt_answer.split('block{')[1].split('}')[0] if 'block{' in gpt_answer else gpt_answer
         prediction = gpt_answer
         #convert the answer to the format (A)
