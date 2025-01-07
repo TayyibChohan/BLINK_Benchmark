@@ -106,12 +106,15 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
  
     try:
         if type(gpt_answer) == list:
-            gpt_answer = gpt_answer[0]
+            gpt_answer = gpt_answer.join()
+        
         gpt_answer = gpt_answer.split('block{')[1].split('}')[0]
         prediction = gpt_answer
         #convert the answer to the format (A)
         if prediction in ['A', 'B', 'C', 'D', 'E']:
             prediction = f'({prediction})'
+        elif prediction in ['(A)', '(B)', '(C)', '(D)', '(E)']:
+            prediction = prediction
         else:
             prediction = prediction.replace(' ', '')
             prediction = f'({prediction})'
