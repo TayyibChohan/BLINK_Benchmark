@@ -70,7 +70,7 @@ def query_model(task_name):
     os.makedirs(image_folder, exist_ok=True)
     if not os.path.exists(output_path):
         outputs = {'val': [], 'test': []}
-        for split in ['val', 'test']:
+        for split in ['val']:
             test_data = load_dataset(dataset_name, task_name)[split]
             for orig_d in tqdm(test_data):
                 idx = orig_d['idx']
@@ -106,10 +106,11 @@ def analyze_qwen_answer(d, gpt_answer, all_choices):
  
     try:
         if type(gpt_answer) == list:
-            gpt_answer = gpt_answer[0]
-        #remove the user and \n
-        gpt_answer = gpt_answer.split('user')[1].split('\n')[1] if 'user' in gpt_answer else gpt_answer
-        gpt_answer = gpt_answer.split('boxed{')[1].split('}')[0] if 'boxed{' in gpt_answer else gpt_answer
+            gpt_answer = gpt_answer[0].strip()
+        else:
+            gpt_answer = gpt_answer.strip()
+        
+        gpt_answer = gpt_answer.split('boxed{')[-1].split('}')[0]
         prediction = gpt_answer
         #convert the answer to the format (A)
         if prediction in ['A', 'B', 'C', 'D', 'E']:
