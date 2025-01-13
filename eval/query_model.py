@@ -7,6 +7,7 @@
 # for qwenvl2:
 from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
 from qwen_vl_utils import process_vision_info
+from vllm import LLM, SamplingParams
 
 import base64
 import os
@@ -69,19 +70,22 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
 #     return "".join(text_outputs)
 
 
-model = Qwen2VLForConditionalGeneration.from_pretrained(
-    "Qwen/QVQ-72B-Preview",
-    # "Qwen/Qwen2-VL-7B-Instruct-AWQ",
-    # torch_dtype="auto",
-    torch_dtype=torch.bfloat16,
-    attn_implementation="flash_attention_2",
-    device_map="auto",
-)
+# model = Qwen2VLForConditionalGeneration.from_pretrained(
+#     "Qwen/QVQ-72B-Preview",
+#     # "Qwen/Qwen2-VL-7B-Instruct-AWQ",
+#     # torch_dtype="auto",
+#     torch_dtype=torch.bfloat16,
+#     attn_implementation="flash_attention_2",
+#     device_map="auto",
+# )
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-VL-2B-Instruct-AWQ")
+sampling_params = SamplingParams(temperature=0.7, top_p=0.8, repetition_penalty=1.05, max_tokens=512)
+llm = LLM("Qwen/Qwen2-VL-2B-Instruct-AWQ", sampling_params=sampling_params, quantization= "awq")
 
-min_pixels = 256*28*28
-max_pixels = 1280*28*28
-processor = AutoProcessor.from_pretrained(
-     "Qwen/QVQ-72B-Preview", min_pixels=min_pixels, max_pixels=max_pixels)
+# min_pixels = 256*28*28
+# max_pixels = 1280*28*28
+# processor = AutoProcessor.from_pretrained(
+#      "Qwen/QVQ-72B-Preview", min_pixels=min_pixels, max_pixels=max_pixels)
 
 def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         """
@@ -115,6 +119,48 @@ def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         messages.append({"role": "user", "content": content})
         return messages
 
+# def query_qwenvl2(image_paths, prompt, retry=10):
+#     """
+#     Query the QwenVL2 model with the prompt and a list of image paths.
+
+#     Parameters:
+#     - image_paths: List of Strings, the path to the images.
+#     - prompt: String, the prompt.
+#     - retry: Integer, the number of retries.
+#     """
+#     # print(prompt)
+#     for r in range(retry):
+#         try:
+#             base64_images = [encode_image(image_path) for image_path in image_paths]
+#             messages = generate_qwen_vl2_message(base64_images, prompt)
+#             text = processor.apply_chat_template(messages)
+#             image_inputs, video_inputs = process_vision_info(messages)
+#             inputs = processor(
+#                 text=[text],
+#                 images=image_inputs,
+#                 videos=video_inputs,
+#                 padding=True,
+#                 return_tensors="pt",
+#             )
+#             inputs = inputs.to("cuda")
+#             generated_ids = model.generate(**inputs, max_new_tokens=512)
+#             generated_ids_trimmed = [
+#                 out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+#             ]
+#             output_text = processor.batch_decode(
+#                 generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+#             )
+#             print(output_text)
+            
+#             del inputs
+#             torch.cuda.empty_cache()
+#             return output_text
+#         except Exception as e:
+#             print(e)
+#             del inputs
+#             torch.cuda.empty_cache()
+#             time.sleep(1)
+#     return 'Failed: Query QwenVL2 Error'
 def query_qwenvl2(image_paths, prompt, retry=10):
     """
     Query the QwenVL2 model with the prompt and a list of image paths.
@@ -129,9 +175,9 @@ def query_qwenvl2(image_paths, prompt, retry=10):
         try:
             base64_images = [encode_image(image_path) for image_path in image_paths]
             messages = generate_qwen_vl2_message(base64_images, prompt)
-            text = processor.apply_chat_template(messages)
+            text = tokenizer.apply_chat_template(messages)
             image_inputs, video_inputs = process_vision_info(messages)
-            inputs = processor(
+            inputs = tokenizer(
                 text=[text],
                 images=image_inputs,
                 videos=video_inputs,
@@ -139,11 +185,11 @@ def query_qwenvl2(image_paths, prompt, retry=10):
                 return_tensors="pt",
             )
             inputs = inputs.to("cuda")
-            generated_ids = model.generate(**inputs, max_new_tokens=512)
+            generated_ids = tokenizer.generate(**inputs, max_new_tokens=512)
             generated_ids_trimmed = [
                 out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
             ]
-            output_text = processor.batch_decode(
+            output_text = tokenizer.batch_decode(
                 generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
             )
             print(output_text)
@@ -157,7 +203,6 @@ def query_qwenvl2(image_paths, prompt, retry=10):
             torch.cuda.empty_cache()
             time.sleep(1)
     return 'Failed: Query QwenVL2 Error'
-
 
 # Function to encode the image
 def encode_image(image_path):
