@@ -73,7 +73,7 @@ model = Qwen2VLForConditionalGeneration.from_pretrained(
     # "Qwen/QVQ-72B-Preview",
     "Qwen/Qwen2-VL-7B-Instruct-AWQ",
     # torch_dtype="auto",
-    torch_dtype=torch.bfloat16,
+    torch_dtype=torch.float16,
     attn_implementation="flash_attention_2",
     device_map="auto",
 )
