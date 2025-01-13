@@ -73,7 +73,7 @@ model = Qwen2VLForConditionalGeneration.from_pretrained(
     # "Qwen/QVQ-72B-Preview",
     "Qwen/Qwen2-VL-7B-Instruct-AWQ",
     # torch_dtype="auto",
-    torch_dtype=torch.float16,
+    torch_dtype=torch.bfloat16,
     attn_implementation="flash_attention_2",
     device_map="auto",
 )
@@ -139,7 +139,7 @@ def query_qwenvl2(image_paths, prompt, retry=10):
                 return_tensors="pt",
             )
             inputs = inputs.to("cuda")
-            generated_ids = model.generate(**inputs, max_new_tokens=2048)
+            generated_ids = model.generate(**inputs, max_new_tokens=512)
             generated_ids_trimmed = [
                 out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
             ]
