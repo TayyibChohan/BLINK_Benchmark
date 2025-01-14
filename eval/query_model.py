@@ -184,7 +184,7 @@ def query_qwenvl2(image_paths, prompt, retry=10):
             {
                 "prompt": prompt,
                 "multi_modal_data": {
-                    "image": image_inputs,
+                    "image": image_inputs
                     # "video": video_inputs
                 },
             },
