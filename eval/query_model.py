@@ -193,14 +193,9 @@ def query_qwenvl2(image_paths, prompt, retry=10):
                 generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
             )
             print(output_text)
-            
-            del inputs
-            torch.cuda.empty_cache()
             return output_text
         except Exception as e:
             print(e)
-            del inputs
-            torch.cuda.empty_cache()
             time.sleep(1)
     return 'Failed: Query QwenVL2 Error'
 
