@@ -78,7 +78,7 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
 #     attn_implementation="flash_attention_2",
 #     device_map="auto",
 # )
-model_name = "Qwen/Qwen2-VL-2B-Instruct"
+model_name = "Qwen/QVQ-72B-Preview"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 sampling_params = SamplingParams(temperature=0.0, max_tokens=2048, stop_token_ids=None)
 llm = LLM(model_name, 
