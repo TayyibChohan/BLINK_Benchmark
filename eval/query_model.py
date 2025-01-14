@@ -84,7 +84,7 @@ sampling_params = SamplingParams(temperature=0.0, stop_token_ids=None)
 llm = LLM(model_name,
         #   max_model_len=32768
         #   max_num_seqs=5
-        min_tokens=1,
+        # min_tokens=1,
         max_tokens=4096
           )
 
