@@ -5,7 +5,9 @@
 # from llava.conversation import conv_templates, SeparatorStyle
 # from openai import OpenAI
 # for qwenvl2:
-from 
+from vllm import LLM, SamplingParams
+from transformers import AutoTokenizer, AutoProcessor
+from qwen_vl_utils import process_vision_info
 
 import base64
 import os
