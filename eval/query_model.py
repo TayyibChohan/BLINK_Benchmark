@@ -78,16 +78,17 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
 #     attn_implementation="flash_attention_2",
 #     device_map="auto",
 # )
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
+model_name = "Qwen/Qwen2-VL-7B-Instruct"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 sampling_params = SamplingParams(temperature=0.0, max_tokens=512, stop_token_ids=None)
-llm = LLM("Qwen/Qwen2-VL-2B-Instruct", 
+llm = LLM(model_name, 
           max_model_len=32768 if process_vision_info is None else 4096,
           max_num_seqs=5)
 
 min_pixels = 256*28*28
 max_pixels = 1280*28*28
 processor = AutoProcessor.from_pretrained(
-     "Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels)
+     model_name, min_pixels=min_pixels, max_pixels=max_pixels)
 
 def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         """
@@ -114,7 +115,7 @@ def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
             content.append({"type": "text", "text": prompt})
         else:
             # formating_instruction = "Format your answer as a JSON object with the following keys: 'answer', 'explanation' and valid answers are only 'A', 'B', 'C', 'D', or 'E'."
-            formating_instruction = "Use \\block{ } to format your anwer. Where valid answers are only 'A', 'B', 'C', 'D', or 'E'.  For example: \n \\block{(A)} is the answer because it is more similar to the provided image \n The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is \\block{(A)}. "
+            formating_instruction = "Use \\boxed{ } to format your anwer. Where valid answers are only 'A', 'B', 'C', 'D', or 'E'.  For example: \n \\boxed{(A)} is the answer because it is more similar to the provided image \n The reference point is the handle of the toothbrush, which is labeled with REF in the first image. The corresponding point on the second image is labeled with A, which is the handle of the toothbrush. Therefore, the corresponding point is \\boxed{(A)}. "
             # formating_instruction = "Surround your answer with the tags <answer> and </answer> with valid answers being 'A', 'B', 'C', 'D', 'E'. You can also provide an explanation by surrounding it with the tags <explanation> and </explanation>."
             text = prompt + "\n" + formating_instruction
             content.append({"type": "text", "text": text})
