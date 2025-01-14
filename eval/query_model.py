@@ -80,7 +80,7 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
 # )
 model_name = "Qwen/Qwen2-VL-7B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-sampling_params = SamplingParams(temperature=0.0, max_tokens=512, stop_token_ids=None)
+sampling_params = SamplingParams(temperature=0.0, max_tokens=2048, stop_token_ids=None)
 llm = LLM(model_name, 
           max_model_len=32768,
           max_num_seqs=5)
@@ -122,48 +122,7 @@ def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         messages.append({"role": "user", "content": content})
         return messages
 
-# def query_qwenvl2(image_paths, prompt, retry=10):
-#     """
-#     Query the QwenVL2 model with the prompt and a list of image paths.
 
-#     Parameters:
-#     - image_paths: List of Strings, the path to the images.
-#     - prompt: String, the prompt.
-#     - retry: Integer, the number of retries.
-#     """
-#     # print(prompt)
-#     for r in range(retry):
-#         try:
-#             base64_images = [encode_image(image_path) for image_path in image_paths]
-#             messages = generate_qwen_vl2_message(base64_images, prompt)
-#             text = processor.apply_chat_template(messages)
-#             image_inputs, video_inputs = process_vision_info(messages)
-#             inputs = processor(
-#                 text=[text],
-#                 images=image_inputs,
-#                 videos=video_inputs,
-#                 padding=True,
-#                 return_tensors="pt",
-#             )
-#             inputs = inputs.to("cuda")
-#             generated_ids = model.generate(**inputs, max_new_tokens=512)
-#             generated_ids_trimmed = [
-#                 out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-#             ]
-#             output_text = processor.batch_decode(
-#                 generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-#             )
-#             print(output_text)
-            
-#             del inputs
-#             torch.cuda.empty_cache()
-#             return output_text
-#         except Exception as e:
-#             print(e)
-#             del inputs
-#             torch.cuda.empty_cache()
-#             time.sleep(1)
-#     return 'Failed: Query QwenVL2 Error'
 def query_qwenvl2(image_paths, prompt, retry=10):
     """
     Query the QwenVL2 model with the prompt and a list of image paths.
@@ -173,9 +132,9 @@ def query_qwenvl2(image_paths, prompt, retry=10):
     - prompt: String, the prompt.
     - retry: Integer, the number of retries.
     """
-    # print(prompt)
+
     for r in range(retry):
-        # try:
+        try:
             base64_images = [encode_image(image_path) for image_path in image_paths]
             messages = generate_qwen_vl2_message(base64_images, prompt)
             prompt = processor.apply_chat_template(messages, tokenize = False)
@@ -194,10 +153,10 @@ def query_qwenvl2(image_paths, prompt, retry=10):
             
             print(output_text)
             return output_text
-    #     # except Exception as e:
-    #     #     print(e)
-    #     #     time.sleep(1)
-    # return 'Failed: Query QwenVL2 Error'
+        except Exception as e:
+            print(e)
+            time.sleep(1)
+    return 'Failed: Query QwenVL2 Error'
 
 # Function to encode the image
 def encode_image(image_path):
@@ -207,38 +166,3 @@ def encode_image(image_path):
 
 def query_gpt4v(image_paths, promt, retry=10):
     return "Not implemented yet"
-# def query_gpt4v(image_paths, prompt, retry=10):
-#     """
-#     Query the GPT-4 Vision model with the prompt and a list of image paths. The temperature is set to 0.0 and retry is set to 10 if fails as default setting.
-
-#     Parameters:
-#     - image_paths: List of Strings, the path to the images.
-#     - prompt: String, the prompt.
-#     - retry: Integer, the number of retries.
-#     """
-#     base64_images = [encode_image(image_path) for image_path in image_paths]
-
-#     for r in range(retry):
-#         try:
-#             input_dicts = [{"type": "text", "text": prompt}]
-#             for i, image in enumerate(base64_images):
-#                 input_dicts.append({"type": "image_url",
-#                                     "image_url": {"url": f"data:image/jpeg;base64,{image}", "detail": "low"}})
-#             response = client.chat.completions.create(
-#                 model="gpt-4-vision-preview",
-#                 messages=[
-#                     {
-#                     "role": "user",
-#                     "content": input_dicts,
-#                     }
-#                 ],
-#                 max_tokens=1024,
-#                 n=1,
-#                 temperature=0.0,
-#             )
-#             print(response)
-#             return response.choices[0].message.content
-#         except Exception as e:
-#             print(e)
-#             time.sleep(1)
-#     return 'Failed: Query GPT4V Error'
