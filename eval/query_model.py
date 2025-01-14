@@ -78,17 +78,16 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
 #     attn_implementation="flash_attention_2",
 #     device_map="auto",
 # )
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-VL-2B-Instruct-AWQ")
-sampling_params = SamplingParams(temperature=0.7, top_p=0.8, repetition_penalty=1.05, max_tokens=512)
-llm = LLM("Qwen/Qwen2-VL-2B-Instruct-AWQ", 
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
+sampling_params = SamplingParams(temperature=0.0, max_tokens=512, stop_token_ids=None)
+llm = LLM("Qwen/Qwen2-VL-2B-Instruct", 
           max_model_len=32768 if process_vision_info is None else 4096,
-          max_num_seqs=5,
-          quantization= "awq")
+          max_num_seqs=5)
 
 min_pixels = 256*28*28
 max_pixels = 1280*28*28
 processor = AutoProcessor.from_pretrained(
-     "Qwen/Qwen2-VL-2B-Instruct-AWQ", min_pixels=min_pixels, max_pixels=max_pixels)
+     "Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels)
 
 def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         """
@@ -179,16 +178,7 @@ def query_qwenvl2(image_paths, prompt, retry=10):
             base64_images = [encode_image(image_path) for image_path in image_paths]
             messages = generate_qwen_vl2_message(base64_images, prompt)
             prompt = processor.apply_chat_template(messages, tokenize = False)
-            # print(text)
             image_inputs, video_inputs = process_vision_info(messages)
-            # inputs = processor(
-            #     text=[text],
-            #     images=image_inputs,
-            #     videos=video_inputs,
-            #     padding=True,
-            #     return_tensors="pt"
-            # )
-
 
             outputs = llm.generate(
             {
@@ -201,22 +191,6 @@ def query_qwenvl2(image_paths, prompt, retry=10):
             sampling_params=sampling_params)
             output_text = [o.outputs[0].text for o in outputs]
             
-
-            # inputs = tokenizer(
-            #     [messages],
-            #     images=image_inputs,
-            #     videos=video_inputs,
-            #     padding=True,
-            #     return_tensors="pt",
-            # )
-            # inputs = inputs.to("cuda")
-            # generated_ids = llm.generate([text], sampling_params)
-            # generated_ids_trimmed = [
-            #     out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-            # ]
-            # output_text = tokenizer.batch_decode(
-            #     generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-            # )
             print(output_text)
             return output_text
     #     # except Exception as e:
