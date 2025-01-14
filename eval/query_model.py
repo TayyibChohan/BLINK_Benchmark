@@ -172,7 +172,7 @@ def query_qwenvl2(image_paths, prompt, retry=10):
     """
     # print(prompt)
     for r in range(retry):
-        try:
+        # try:
             base64_images = [encode_image(image_path) for image_path in image_paths]
             messages = generate_qwen_vl2_message(base64_images, prompt)
             text = tokenizer.apply_chat_template(
@@ -196,10 +196,10 @@ def query_qwenvl2(image_paths, prompt, retry=10):
             )
             print(output_text)
             return output_text
-        except Exception as e:
-            print(e)
-            time.sleep(1)
-    return 'Failed: Query QwenVL2 Error'
+    #     # except Exception as e:
+    #     #     print(e)
+    #     #     time.sleep(1)
+    # return 'Failed: Query QwenVL2 Error'
 
 # Function to encode the image
 def encode_image(image_path):
