@@ -5,9 +5,7 @@
 # from llava.conversation import conv_templates, SeparatorStyle
 # from openai import OpenAI
 # for qwenvl2:
-from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
-from qwen_vl_utils import process_vision_info
-from vllm import LLM, SamplingParams
+from 
 
 import base64
 import os
@@ -80,12 +78,15 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
 # )
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-VL-2B-Instruct-AWQ")
 sampling_params = SamplingParams(temperature=0.7, top_p=0.8, repetition_penalty=1.05, max_tokens=512)
-llm = LLM("Qwen/Qwen2-VL-2B-Instruct-AWQ", quantization= "awq")
+llm = LLM("Qwen/Qwen2-VL-2B-Instruct-AWQ", 
+          max_model_len=32768 if process_vision_info is None else 4096,
+          max_num_seqs=5,
+          quantization= "awq")
 
-# min_pixels = 256*28*28
-# max_pixels = 1280*28*28
-# processor = AutoProcessor.from_pretrained(
-#      "Qwen/QVQ-72B-Preview", min_pixels=min_pixels, max_pixels=max_pixels)
+min_pixels = 256*28*28
+max_pixels = 1280*28*28
+processor = AutoProcessor.from_pretrained(
+     "Qwen/QVQ-72B-Preview", min_pixels=min_pixels, max_pixels=max_pixels)
 
 def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         """
@@ -175,26 +176,39 @@ def query_qwenvl2(image_paths, prompt, retry=10):
         # try:
             base64_images = [encode_image(image_path) for image_path in image_paths]
             messages = generate_qwen_vl2_message(base64_images, prompt)
-            text = tokenizer.apply_chat_template(
-                messages
-                )
-            print(text)
+            inputs = processor.apply_chat_template(messages,
+                                                   tokenize=False)
+            # print(text)
             image_inputs, video_inputs = process_vision_info(messages)
-            inputs = tokenizer(
-                text=[text] if type(text) == str else text,
-                images=image_inputs,
-                videos=video_inputs,
-                padding=True,
-                return_tensors="pt",
-            )
-            inputs = inputs.to("cuda")
-            generated_ids = llm.generate([text], sampling_params)
-            generated_ids_trimmed = [
-                out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-            ]
-            output_text = tokenizer.batch_decode(
-                generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-            )
+
+
+            outputs = llm.generate(
+            {
+                "prompt": inputs,
+                "multi_modal_data": {
+                    "image": image_inputs,
+                    "video": video_inputs,
+                },
+            },
+            sampling_params=sampling_params)
+            output_text = [o.outputs[0].text for o in outputs]
+            
+
+            # inputs = tokenizer(
+            #     [messages],
+            #     images=image_inputs,
+            #     videos=video_inputs,
+            #     padding=True,
+            #     return_tensors="pt",
+            # )
+            # inputs = inputs.to("cuda")
+            # generated_ids = llm.generate([text], sampling_params)
+            # generated_ids_trimmed = [
+            #     out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            # ]
+            # output_text = tokenizer.batch_decode(
+            #     generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+            # )
             print(output_text)
             return output_text
     #     # except Exception as e:
