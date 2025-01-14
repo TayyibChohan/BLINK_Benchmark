@@ -186,7 +186,7 @@ def query_qwenvl2(image_paths, prompt, retry=10):
                 images=image_inputs,
                 videos=video_inputs,
                 padding=True,
-                return_tensors="pt",
+                tokenize=False,
             )
 
 
