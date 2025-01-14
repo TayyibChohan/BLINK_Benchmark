@@ -175,17 +175,19 @@ def query_qwenvl2(image_paths, prompt, retry=10):
         try:
             base64_images = [encode_image(image_path) for image_path in image_paths]
             messages = generate_qwen_vl2_message(base64_images, prompt)
-            text = tokenizer.apply_chat_template(messages)
-            image_inputs, video_inputs = process_vision_info(messages)
-            inputs = tokenizer(
-                text=[text],
-                images=image_inputs,
-                videos=video_inputs,
-                padding=True,
-                return_tensors="pt",
-            )
+            text = tokenizer.apply_chat_template(
+                messages
+                )
+            # image_inputs, video_inputs = process_vision_info(messages)
+            # inputs = tokenizer(
+            #     text=[text],
+            #     images=image_inputs,
+            #     videos=video_inputs,
+            #     padding=True,
+            #     return_tensors="pt",
+            # )
             inputs = inputs.to("cuda")
-            generated_ids = tokenizer.generate(**inputs, max_new_tokens=512)
+            generated_ids = tokenizer.generate([text], sampling_params)
             generated_ids_trimmed = [
                 out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
             ]
