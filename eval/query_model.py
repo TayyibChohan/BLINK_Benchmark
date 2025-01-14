@@ -88,7 +88,7 @@ llm = LLM("Qwen/Qwen2-VL-2B-Instruct-AWQ",
 min_pixels = 256*28*28
 max_pixels = 1280*28*28
 processor = AutoProcessor.from_pretrained(
-     "Qwen/QVQ-72B-Preview", min_pixels=min_pixels, max_pixels=max_pixels)
+     "Qwen/Qwen2-VL-2B-Instruct-AWQ", min_pixels=min_pixels, max_pixels=max_pixels)
 
 def generate_qwen_vl2_message(image_paths, prompt, format_as_json=True):
         """
