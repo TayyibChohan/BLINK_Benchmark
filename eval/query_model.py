@@ -180,7 +180,7 @@ def query_qwenvl2(image_paths, prompt, retry=10):
                 )
             image_inputs, video_inputs = process_vision_info(messages)
             inputs = tokenizer(
-                text=[text],
+                text=[text] if type(text) == str else text,
                 images=image_inputs,
                 videos=video_inputs,
                 padding=True,
