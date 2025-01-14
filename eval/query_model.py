@@ -178,6 +178,7 @@ def query_qwenvl2(image_paths, prompt, retry=10):
             text = tokenizer.apply_chat_template(
                 messages
                 )
+            print(text)
             image_inputs, video_inputs = process_vision_info(messages)
             inputs = tokenizer(
                 text=[text] if type(text) == str else text,
