@@ -178,10 +178,16 @@ def query_qwenvl2(image_paths, prompt, retry=10):
         # try:
             base64_images = [encode_image(image_path) for image_path in image_paths]
             messages = generate_qwen_vl2_message(base64_images, prompt)
-            inputs = processor.apply_chat_template(messages,
-                                                   tokenize=False)
+            text = processor.apply_chat_template(messages)
             # print(text)
             image_inputs, video_inputs = process_vision_info(messages)
+            inputs = processor(
+                text=[text],
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
 
 
             outputs = llm.generate(
