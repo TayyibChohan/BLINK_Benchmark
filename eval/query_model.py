@@ -41,7 +41,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 sampling_params = SamplingParams(temperature=0.0, stop_token_ids=None)
 llm = LLM(model_name,
         max_model_len=32768,
-        limit_mm_per_prompt={"image": max_images},
+        limit_mm_per_prompt={"image": 4}
           )
 
 min_pixels = 256*28*28
