@@ -35,11 +35,13 @@ def query_llava(image_urls, question, conv_template="llava_llama_3"):
 #     device_map="auto",
 # )
 
+max_images = 5
 model_name = "Qwen/Qwen2-VL-7B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 sampling_params = SamplingParams(temperature=0.0, stop_token_ids=None)
 llm = LLM(model_name,
-        max_model_len=32768
+        max_model_len=32768,
+        limit_mm_per_prompt={"image": max_images},
           )
 
 min_pixels = 256*28*28
